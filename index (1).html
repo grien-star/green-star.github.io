@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DepEd Student Records Validation System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        .file-upload-container {
+            transition: all 0.3s ease;
+        }
+        .file-upload-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        .error-item {
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        .cell-location {
+            background-color: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-indigo-800 mb-2">DepEd Student Records Validation System</h1>
+            <p class="text-lg text-gray-600">Cross-validate Summary of Grades, Form 137, and Form 138</p>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Data Entry Guide with Correct Cell Locations -->
+            <section class="mb-8">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">📋 Where to Enter Student Data (Based on Your Files)</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Summary of Grades Guide -->
+                        <div class="border rounded-lg p-4 bg-indigo-50">
+                            <h3 class="font-bold text-indigo-800 mb-3">📊 Summary of Final Grades</h3>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">Student Name:</span> <code class="bg-white px-2 py-1 rounded">Cell B11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">Filipino Final Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell J11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">English Final Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell O11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">Mathematics Final Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell T11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">Science Final Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell Y11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">AP Final Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell AD11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">TLE Final Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell AI11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">MAPEH Final Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell AN11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">ESP Final Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell AS11</code>
+                            </div>
+                            <div class="cell-location border-indigo-300">
+                                <span class="font-semibold">General Average:</span> <code class="bg-white px-2 py-1 rounded">Cell AU11</code>
+                            </div>
+                            <p class="text-xs mt-2 text-indigo-600">*For multiple students, continue down: B12, B13, etc.</p>
+                        </div>
+
+                        <!-- Form 137 Guide -->
+                        <div class="border rounded-lg p-4 bg-blue-50">
+                            <h3 class="font-bold text-blue-800 mb-3">📄 Form 137</h3>
+                            <div class="cell-location border-blue-300">
+                                <span class="font-semibold">Last Name:</span> <code class="bg-white px-2 py-1 rounded">Cell C7</code>
+                            </div>
+                            <div class="cell-location border-blue-300">
+                                <span class="font-semibold">First Name:</span> <code class="bg-white px-2 py-1 rounded">Cell G7</code>
+                            </div>
+                            <div class="cell-location border-blue-300">
+                                <span class="font-semibold">Middle Name:</span> <code class="bg-white px-2 py-1 rounded">Cell K7</code>
+                            </div>
+                            <div class="cell-location border-blue-300">
+                                <span class="font-semibold">LRN:</span> <code class="bg-white px-2 py-1 rounded">Cell E8</code>
+                            </div>
+                            <div class="cell-location border-blue-300">
+                                <span class="font-semibold">Birthdate:</span> <code class="bg-white px-2 py-1 rounded">Cell J8</code>
+                            </div>
+                            <div class="cell-location border-blue-300">
+                                <span class="font-semibold">Sex:</span> <code class="bg-white px-2 py-1 rounded">Cell M8</code>
+                            </div>
+                            
+                            <p class="font-semibold mt-3 text-sm">Subject Grades (in Scholastic Record section):</p>
+                            <div class="grid grid-cols-2 gap-1 mt-1 text-xs">
+                                <div><span class="font-medium">Filipino:</span> Cell K16</div>
+                                <div><span class="font-medium">English:</span> Cell K17</div>
+                                <div><span class="font-medium">Math:</span> Cell K18</div>
+                                <div><span class="font-medium">Science:</span> Cell K19</div>
+                                <div><span class="font-medium">AP:</span> Cell K20</div>
+                                <div><span class="font-medium">ESP:</span> Cell K21</div>
+                                <div><span class="font-medium">TLE:</span> Cell K22</div>
+                                <div><span class="font-medium">MAPEH:</span> Cell K23</div>
+                            </div>
+                        </div>
+
+                        <!-- Form 138 Guide -->
+                        <div class="border rounded-lg p-4 bg-green-50">
+                            <h3 class="font-bold text-green-800 mb-3">📋 Form 138</h3>
+                            <div class="cell-location border-green-300">
+                                <span class="font-semibold">Full Name:</span> <code class="bg-white px-2 py-1 rounded">Cell Q12</code>
+                            </div>
+                            <div class="cell-location border-green-300">
+                                <span class="font-semibold">LRN:</span> <code class="bg-white px-2 py-1 rounded">Cell U15</code>
+                            </div>
+                            <div class="cell-location border-green-300">
+                                <span class="font-semibold">Age:</span> <code class="bg-white px-2 py-1 rounded">Cell Q13</code>
+                            </div>
+                            <div class="cell-location border-green-300">
+                                <span class="font-semibold">Sex:</span> <code class="bg-white px-2 py-1 rounded">Cell U13</code>
+                            </div>
+                            <div class="cell-location border-green-300">
+                                <span class="font-semibold">Grade:</span> <code class="bg-white px-2 py-1 rounded">Cell Q14</code>
+                            </div>
+                            <div class="cell-location border-green-300">
+                                <span class="font-semibold">Section:</span> <code class="bg-white px-2 py-1 rounded">Cell U14</code>
+                            </div>
+                            
+                            <p class="font-semibold mt-3 text-sm">Subject Grades (Back Sheet - "CARD jhs back"):</p>
+                            <div class="grid grid-cols-2 gap-1 mt-1 text-xs">
+                                <div><span class="font-medium">Filipino:</span> Cell I7</div>
+                                <div><span class="font-medium">English:</span> Cell I8</div>
+                                <div><span class="font-medium">Math:</span> Cell I9</div>
+                                <div><span class="font-medium">Science:</span> Cell I10</div>
+                                <div><span class="font-medium">AP:</span> Cell I11</div>
+                                <div><span class="font-medium">TLE:</span> Cell I12</div>
+                                <div><span class="font-medium">MAPEH:</span> Cell I13-16 (average)</div>
+                                <div><span class="font-medium">ESP:</span> Cell I17</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Upload Section -->
+            <section class="mb-12">
+                <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Upload Your Files</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Summary of Final Grades -->
+                        <div class="file-upload-container bg-indigo-50 rounded-lg p-6 border-2 border-dashed border-indigo-200">
+                            <div class="flex flex-col items-center">
+                                <div class="bg-indigo-100 p-4 rounded-full mb-4">
+                                    <i class="fas fa-file-excel text-indigo-600 text-3xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-indigo-800 mb-2">Summary of Final Grades</h3>
+                                <p class="text-sm text-gray-500 mb-4 text-center">GRADE-7-10_SUMMARY-FINAL-GRADES.xlsx</p>
+                                <input type="file" id="gradesFile" accept=".xlsx, .xls, .csv" class="hidden">
+                                <label for="gradesFile" class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition">
+                                    <i class="fas fa-upload mr-2"></i> Choose File
+                                </label>
+                                <p id="gradesFileName" class="text-sm text-gray-500 mt-2 truncate w-full text-center">No file selected</p>
+                            </div>
+                        </div>
+
+                        <!-- Form 137 -->
+                        <div class="file-upload-container bg-blue-50 rounded-lg p-6 border-2 border-dashed border-blue-200">
+                            <div class="flex flex-col items-center">
+                                <div class="bg-blue-100 p-4 rounded-full mb-4">
+                                    <i class="fas fa-file-alt text-blue-600 text-3xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-blue-800 mb-2">Form 137</h3>
+                                <p class="text-sm text-gray-500 mb-4 text-center">137.xlsx (Learner's Permanent Academic Record)</p>
+                                <input type="file" id="form137File" accept=".xlsx, .xls, .csv" class="hidden">
+                                <label for="form137File" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition">
+                                    <i class="fas fa-upload mr-2"></i> Choose File
+                                </label>
+                                <p id="form137FileName" class="text-sm text-gray-500 mt-2 truncate w-full text-center">No file selected</p>
+                            </div>
+                        </div>
+
+                        <!-- Form 138 -->
+                        <div class="file-upload-container bg-green-50 rounded-lg p-6 border-2 border-dashed border-green-200">
+                            <div class="flex flex-col items-center">
+                                <div class="bg-green-100 p-4 rounded-full mb-4">
+                                    <i class="fas fa-file-invoice text-green-600 text-3xl"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-green-800 mb-2">Form 138</h3>
+                                <p class="text-sm text-gray-500 mb-4 text-center">DEPED-FORM-138-jhs.xls (Report Card)</p>
+                                <input type="file" id="form138File" accept=".xlsx, .xls, .csv" class="hidden">
+                                <label for="form138File" class="cursor-pointer bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition">
+                                    <i class="fas fa-upload mr-2"></i> Choose File
+                                </label>
+                                <p id="form138FileName" class="text-sm text-gray-500 mt-2 truncate w-full text-center">No file selected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Process Button -->
+                <div class="text-center">
+                    <button id="processBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">
+                        <i class="fas fa-cogs mr-2"></i> Process and Validate Records
+                    </button>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section id="progressSection" class="hidden mb-12">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Processing Files</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Progress Bar -->
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-700">Processing progress</span>
+                                <span id="progressPercent" class="text-sm font-medium text-gray-700">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="progressBar" class="bg-purple-600 h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Status Messages -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-indigo-50 p-4 rounded-lg">
+                                <div class="flex items-center">
+                                    <div id="gradesStatusIcon" class="text-indigo-500 mr-3">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-indigo-800">Summary of Final Grades</p>
+                                        <p id="gradesStatusText" class="text-xs text-gray-600">Pending</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <div class="flex items-center">
+                                    <div id="form137StatusIcon" class="text-blue-500 mr-3">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-800">Form 137</p>
+                                        <p id="form137StatusText" class="text-xs text-gray-600">Pending</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <div class="flex items-center">
+                                    <div id="form138StatusIcon" class="text-green-500 mr-3">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-green-800">Form 138</p>
+                                        <p id="form138StatusText" class="text-xs text-gray-600">Pending</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="hidden">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <!-- Tabs -->
+                    <div class="border-b border-gray-200">
+                        <nav class="flex -mb-px">
+                            <button data-tab="errorReport" class="tab-btn py-4 px-6 text-center border-b-2 font-medium text-sm border-purple-500 text-purple-600 bg-purple-50">
+                                <i class="fas fa-exclamation-circle mr-2"></i> Error Report
+                            </button>
+                            <button data-tab="verifiedRecords" class="tab-btn py-4 px-6 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                <i class="fas fa-check-circle mr-2"></i> Verified Records
+                            </button>
+                            <button data-tab="errorDetection" class="tab-btn py-4 px-6 text-center border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                                <i class="fas fa-search mr-2"></i> Detailed Analysis
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div class="p-6">
+                        <!-- Error Report Tab -->
+                        <div id="errorReport" class="tab-content active">
+                            <div class="flex items-center mb-6">
+                                <div class="bg-red-100 p-3 rounded-full mr-4">
+                                    <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800">Error Report</h3>
+                                    <p class="text-gray-600">Discrepancies found during cross-validation</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-red-50 rounded-lg p-4 mb-6">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle text-red-500 mr-3"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-red-700">
+                                            <span id="totalErrors" class="font-bold">0</span> errors found across <span id="affectedRecords" class="font-bold">0</span> students.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="errorList" class="space-y-4 max-h-96 overflow-y-auto">
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-check-circle text-green-400 text-4xl mb-3"></i>
+                                    <p>No errors found in the validation process</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Verified Records Tab -->
+                        <div id="verifiedRecords" class="tab-content">
+                            <div class="flex items-center mb-6">
+                                <div class="bg-green-100 p-3 rounded-full mr-4">
+                                    <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800">Verified Records</h3>
+                                    <p class="text-gray-600">Students with consistent records across all forms</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-green-50 rounded-lg p-4 mb-6">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle text-green-500 mr-3"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-green-700">
+                                            <span id="totalVerified" class="font-bold">0</span> students with complete and consistent records.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">LRN</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade Level</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">General Average</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="verifiedRecordsList" class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                                No verified records to display
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Analysis Tab -->
+                        <div id="errorDetection" class="tab-content">
+                            <div class="flex items-center mb-6">
+                                <div class="bg-yellow-100 p-3 rounded-full mr-4">
+                                    <i class="fas fa-search text-yellow-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800">Detailed Analysis</h3>
+                                    <p class="text-gray-600">Subject-level grade comparison across all forms</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-6">
+                                <!-- Subject Comparison -->
+                                <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                    <h4 class="font-medium text-gray-800 mb-4">Subject Grade Consistency</h4>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Student</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Subject</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Summary</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Form 137</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Form 138</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="subjectComparisonList" class="divide-y divide-gray-200">
+                                                <tr>
+                                                    <td colspan="6" class="px-4 py-4 text-center text-gray-500">
+                                                        No comparison data available
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Statistics -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                        <h4 class="font-medium text-gray-800 mb-4">Grade Mismatches</h4>
+                                        <p class="text-3xl font-bold text-red-600" id="gradeMismatches">0</p>
+                                        <p class="text-sm text-gray-500 mt-2">Subjects with inconsistent grades</p>
+                                    </div>
+                                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                        <h4 class="font-medium text-gray-800 mb-4">Missing Records</h4>
+                                        <p class="text-3xl font-bold text-orange-600" id="missingRecords">0</p>
+                                        <p class="text-sm text-gray-500 mt-2">Students with incomplete records</p>
+                                    </div>
+                                    <div class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                                        <h4 class="font-medium text-gray-800 mb-4">Complete Records</h4>
+                                        <p class="text-3xl font-bold text-green-600" id="completeRecords">0</p>
+                                        <p class="text-sm text-gray-500 mt-2">Students with all three forms</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-16 text-center text-gray-500 text-sm">
+            <p>© 2023 DepEd Student Records Validation System</p>
+        </footer>
+    </div>
+
+    <script>
+        // Global variables
+        let summaryGrades = [];
+        let form137Records = [];
+        let form138Records = [];
+        let validationResults = {
+            errors: [],
+            verified: [],
+            subjectComparisons: [],
+            stats: {
+                gradeMismatches: 0,
+                missingRecords: 0,
+                completeRecords: 0
+            }
+        };
+
+        // File input handlers
+        document.getElementById('gradesFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('gradesFileName').textContent = fileName;
+        });
+
+        document.getElementById('form137File').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('form137FileName').textContent = fileName;
+        });
+
+        document.getElementById('form138File').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('form138FileName').textContent = fileName;
+        });
+
+        // Process button handler
+        document.getElementById('processBtn').addEventListener('click', async function() {
+            const gradesFile = document.getElementById('gradesFile').files[0];
+            const form137File = document.getElementById('form137File').files[0];
+            const form138File = document.getElementById('form138File').files[0];
+            
+            if (!gradesFile || !form137File || !form138File) {
+                alert('Please upload all three required files before processing.');
+                return;
+            }
+            
+            document.getElementById('progressSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            
+            updateProgress(0);
+            resetStatuses();
+            
+            try {
+                await processFiles(gradesFile, form137File, form138File);
+            } catch (error) {
+                alert('Error processing files: ' + error.message);
+                console.error(error);
+                document.getElementById('progressSection').classList.add('hidden');
+            }
+        });
+
+        function resetStatuses() {
+            updateStatus('grades', 'Pending', 'fa-hourglass-half', 'text-indigo-500');
+            updateStatus('form137', 'Pending', 'fa-hourglass-half', 'text-blue-500');
+            updateStatus('form138', 'Pending', 'fa-hourglass-half', 'text-green-500');
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('progressPercent').textContent = `${Math.round(percent)}%`;
+        }
+
+        function updateStatus(file, text, icon, colorClass) {
+            const statusText = document.getElementById(`${file}StatusText`);
+            const statusIcon = document.getElementById(`${file}StatusIcon`);
+            
+            statusText.textContent = text;
+            statusText.className = `text-xs ${colorClass}`;
+            statusIcon.innerHTML = `<i class="fas ${icon} ${colorClass}"></i>`;
+        }
+
+        async function processFiles(gradesFile, form137File, form138File) {
+            updateProgress(10);
+            updateStatus('grades', 'Processing...', 'fa-spinner fa-pulse', 'text-indigo-500');
+            
+            const gradesBuffer = await gradesFile.arrayBuffer();
+            summaryGrades = parseSummaryGrades(gradesBuffer);
+            
+            updateProgress(30);
+            updateStatus('grades', `Processed (${summaryGrades.length} students)`, 'fa-check-circle', 'text-green-500');
+            updateStatus('form137', 'Processing...', 'fa-spinner fa-pulse', 'text-blue-500');
+            
+            const form137Buffer = await form137File.arrayBuffer();
+            form137Records = parseForm137(form137Buffer);
+            
+            updateProgress(60);
+            updateStatus('form137', `Processed (${form137Records.length} records)`, 'fa-check-circle', 'text-green-500');
+            updateStatus('form138', 'Processing...', 'fa-spinner fa-pulse', 'text-green-500');
+            
+            const form138Buffer = await form138File.arrayBuffer();
+            form138Records = parseForm138(form138Buffer);
+            
+            updateProgress(80);
+            updateStatus('form138', `Processed (${form138Records.length} students)`, 'fa-check-circle', 'text-green-500');
+            
+            performCrossValidation();
+            
+            updateProgress(100);
+            setTimeout(showResults, 500);
+        }
+
+        // Parse Summary of Final Grades (Based on your cell locations)
+        function parseSummaryGrades(buffer) {
+            try {
+                const workbook = XLSX.read(buffer, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                
+                // Get the range of the sheet
+                const range = XLSX.utils.decode_range(worksheet['!ref']);
+                const students = [];
+                
+                // Student names start at row 11 (0-indexed = row 10)
+                for (let row = 10; row <= range.e.r; row++) {
+                    // Get cell B (column 1) for student name
+                    const nameCell = worksheet[XLSX.utils.encode_cell({ r: row, c: 1 })];
+                    const studentName = nameCell ? nameCell.v : null;
+                    
+                    if (!studentName || studentName.toString().trim() === '') continue;
+                    
+                    // Helper function to get cell value safely
+                    const getCellValue = (col) => {
+                        const cell = worksheet[XLSX.utils.encode_cell({ r: row, c: col })];
+                        return cell ? parseFloat(cell.v) || null : null;
+                    };
+                    
+                    const student = {
+                        name: studentName.toString().trim(),
+                        lrn: null, // LRN not in summary file
+                        gradeLevel: 'Grade 7-10',
+                        row: row + 1, // Store row number for reference
+                        subjects: {
+                            filipino: getCellValue(9),  // Column J (0-indexed: 9)
+                            english: getCellValue(14),   // Column O (14)
+                            mathematics: getCellValue(19), // Column T (19)
+                            science: getCellValue(24),    // Column Y (24)
+                            aralingPanlipunan: getCellValue(29), // Column AD (29)
+                            tle: getCellValue(34),        // Column AI (34)
+                            mapeh: getCellValue(38),      // Column AN (38) - MAPEH average
+                            esp: getCellValue(44)         // Column AS (44)
+                        },
+                        generalAverage: getCellValue(46)  // Column AU (46)
+                    };
+                    
+                    students.push(student);
+                }
+                
+                return students;
+            } catch (error) {
+                console.error('Error parsing summary grades:', error);
+                return [];
+            }
+        }
+
+        // Parse Form 137 (Based on your cell locations)
+        function parseForm137(buffer) {
+            try {
+                const workbook = XLSX.read(buffer, { type: 'array' });
+                const sheetName = 'front'; // Looking specifically for 'front' sheet
+                const worksheet = workbook.Sheets[sheetName];
+                
+                if (!worksheet) return [];
+                
+                const getCell = (addr) => {
+                    const cell = worksheet[addr];
+                    return cell ? cell.v : null;
+                };
+                
+                // Extract student info from exact cells you provided
+                const lastName = getCell('C7') || '';
+                const firstName = getCell('G7') || '';
+                const middleName = getCell('K7') || '';
+                const lrn = getCell('E8') || '';
+                const birthdate = getCell('J8') || '';
+                const sex = getCell('M8') || '';
+                
+                // Combine name parts
+                const fullName = `${firstName} ${middleName} ${lastName}`.replace(/\s+/g, ' ').trim();
+                
+                if (!fullName || fullName === '') return [];
+                
+                // Extract subject grades from the scholastic record section
+                const subjects = {
+                    filipino: getCell('K16') ? parseFloat(getCell('K16')) : null,
+                    english: getCell('K17') ? parseFloat(getCell('K17')) : null,
+                    mathematics: getCell('K18') ? parseFloat(getCell('K18')) : null,
+                    science: getCell('K19') ? parseFloat(getCell('K19')) : null,
+                    aralingPanlipunan: getCell('K20') ? parseFloat(getCell('K20')) : null,
+                    esp: getCell('K21') ? parseFloat(getCell('K21')) : null,
+                    tle: getCell('K22') ? parseFloat(getCell('K22')) : null,
+                    mapeh: getCell('K23') ? parseFloat(getCell('K23')) : null
+                };
+                
+                const record = {
+                    lrn: lrn.toString().trim(),
+                    name: fullName,
+                    lastName: lastName.toString().trim(),
+                    firstName: firstName.toString().trim(),
+                    middleName: middleName.toString().trim(),
+                    birthdate: birthdate,
+                    sex: sex.toString().trim(),
+                    gradeLevel: 'Grade 7-10', // You might want to extract this from elsewhere
+                    subjects: subjects
+                };
+                
+                return [record]; // Return as array with one record
+                
+            } catch (error) {
+                console.error('Error parsing Form 137:', error);
+                return [];
+            }
+        }
+
+        // Parse Form 138 (Based on your cell locations)
+        function parseForm138(buffer) {
+            try {
+                const workbook = XLSX.read(buffer, { type: 'array' });
+                
+                // First sheet - CARD Jhs (for student info)
+                const infoSheet = workbook.Sheets[workbook.SheetNames[0]];
+                
+                // Second sheet - CARD jhs back (for subject grades)
+                const gradesSheet = workbook.Sheets[workbook.SheetNames[1]];
+                
+                if (!infoSheet || !gradesSheet) return [];
+                
+                const getCell = (sheet, addr) => {
+                    const cell = sheet[addr];
+                    return cell ? cell.v : null;
+                };
+                
+                // Extract student info from exact cells you provided
+                const fullName = getCell(infoSheet, 'Q12') || '';
+                const lrn = getCell(infoSheet, 'U15') || '';
+                const age = getCell(infoSheet, 'Q13') || '';
+                const sex = getCell(infoSheet, 'U13') || '';
+                const grade = getCell(infoSheet, 'Q14') || '';
+                const section = getCell(infoSheet, 'U14') || '';
+                
+                if (!fullName || fullName === '' || fullName.toString().includes('Name:')) return [];
+                
+                // Extract subject grades from back sheet
+                const subjects = {
+                    filipino: getCell(gradesSheet, 'I7') ? parseFloat(getCell(gradesSheet, 'I7')) : null,
+                    english: getCell(gradesSheet, 'I8') ? parseFloat(getCell(gradesSheet, 'I8')) : null,
+                    mathematics: getCell(gradesSheet, 'I9') ? parseFloat(getCell(gradesSheet, 'I9')) : null,
+                    science: getCell(gradesSheet, 'I10') ? parseFloat(getCell(gradesSheet, 'I10')) : null,
+                    aralingPanlipunan: getCell(gradesSheet, 'I11') ? parseFloat(getCell(gradesSheet, 'I11')) : null,
+                    tle: getCell(gradesSheet, 'I12') ? parseFloat(getCell(gradesSheet, 'I12')) : null,
+                    // MAPEH average from the four components
+                    mapeh: calculateMAPEHAverage(gradesSheet),
+                    esp: getCell(gradesSheet, 'I17') ? parseFloat(getCell(gradesSheet, 'I17')) : null
+                };
+                
+                const student = {
+                    lrn: lrn.toString().trim(),
+                    name: fullName.toString().trim(),
+                    age: age,
+                    sex: sex.toString().trim(),
+                    grade: grade.toString().trim(),
+                    section: section.toString().trim(),
+                    gradeLevel: `Grade ${grade}`,
+                    subjects: subjects
+                };
+                
+                return [student];
+                
+            } catch (error) {
+                console.error('Error parsing Form 138:', error);
+                return [];
+            }
+        }
+
+        // Helper function to calculate MAPEH average from components
+        function calculateMAPEHAverage(sheet) {
+            const music = getCellValue(sheet, 'I13');
+            const arts = getCellValue(sheet, 'I14');
+            const pe = getCellValue(sheet, 'I15');
+            const health = getCellValue(sheet, 'I16');
+            
+            if (music && arts && pe && health) {
+                return Math.round((music + arts + pe + health) / 4);
+            }
+            return null;
+        }
+
+        function getCellValue(sheet, addr) {
+            const cell = sheet[addr];
+            return cell ? parseFloat(cell.v) || null : null;
+        }
+
+        // Cross-validation logic
+        function performCrossValidation() {
+            validationResults = {
+                errors: [],
+                verified: [],
+                subjectComparisons: [],
+                stats: {
+                    gradeMismatches: 0,
+                    missingRecords: 0,
+                    completeRecords: 0
+                }
+            };
+
+            // Create a map of students by name (since LRN might not be consistent across all files)
+            const allStudents = new Map();
+            
+            // Add summary grades students
+            summaryGrades.forEach(student => {
+                const nameKey = student.name.toLowerCase().replace(/[^a-z]/g, '');
+                if (!allStudents.has(nameKey)) {
+                    allStudents.set(nameKey, { 
+                        summary: student, 
+                        form137: null, 
+                        form138: null,
+                        name: student.name
+                    });
+                } else {
+                    allStudents.get(nameKey).summary = student;
+                }
+            });
+            
+            // Add Form 137 students
+            form137Records.forEach(student => {
+                const nameKey = student.name.toLowerCase().replace(/[^a-z]/g, '');
+                if (!allStudents.has(nameKey)) {
+                    allStudents.set(nameKey, { 
+                        summary: null, 
+                        form137: student, 
+                        form138: null,
+                        name: student.name
+                    });
+                } else {
+                    allStudents.get(nameKey).form137 = student;
+                }
+            });
+            
+            // Add Form 138 students
+            form138Records.forEach(student => {
+                const nameKey = student.name.toLowerCase().replace(/[^a-z]/g, '');
+                if (!allStudents.has(nameKey)) {
+                    allStudents.set(nameKey, { 
+                        summary: null, 
+                        form137: null, 
+                        form138: student,
+                        name: student.name
+                    });
+                } else {
+                    allStudents.get(nameKey).form138 = student;
+                }
+            });
+
+            // Validate each student
+            allStudents.forEach((records, nameKey) => {
+                validateStudentRecords(records, nameKey);
+            });
+        }
+
+        function validateStudentRecords(records, nameKey) {
+            const { summary, form137, form138, name } = records;
+            
+            const studentName = name || nameKey;
+            const errors = [];
+            const subjectComparisons = [];
+            
+            let hasAllRecords = true;
+            
+            // Check for missing records
+            if (!summary) {
+                errors.push({
+                    type: 'Missing Record',
+                    details: 'Student not found in Summary of Final Grades',
+                    source: 'Summary',
+                    severity: 'High'
+                });
+                hasAllRecords = false;
+            }
+            
+            if (!form137) {
+                errors.push({
+                    type: 'Missing Record',
+                    details: 'Student not found in Form 137',
+                    source: 'Form 137',
+                    severity: 'High'
+                });
+                hasAllRecords = false;
+            }
+            
+            if (!form138) {
+                errors.push({
+                    type: 'Missing Record',
+                    details: 'Student not found in Form 138',
+                    source: 'Form 138',
+                    severity: 'High'
+                });
+                hasAllRecords = false;
+            }
+
+            // If we have all records, validate subjects
+            if (summary && form137 && form138) {
+                validationResults.stats.completeRecords++;
+                
+                const subjects = [
+                    'filipino', 'english', 'mathematics', 'science', 
+                    'aralingPanlipunan', 'tle', 'mapeh', 'esp'
+                ];
+                
+                subjects.forEach(subject => {
+                    const summaryGrade = summary.subjects[subject];
+                    const form137Grade = form137.subjects[subject];
+                    const form138Grade = form138.subjects[subject];
+                    
+                    // Only compare if all grades exist
+                    if (summaryGrade && form137Grade && form138Grade) {
+                        subjectComparisons.push({
+                            studentName,
+                            subject,
+                            summary: summaryGrade,
+                            form137: form137Grade,
+                            form138: form138Grade,
+                            consistent: Math.abs(summaryGrade - form137Grade) <= 1 && 
+                                       Math.abs(summaryGrade - form138Grade) <= 1
+                        });
+                        
+                        if (Math.abs(summaryGrade - form137Grade) > 1 || 
+                            Math.abs(summaryGrade - form138Grade) > 1) {
+                            errors.push({
+                                type: 'Grade Mismatch',
+                                details: `${subject} grade differs: Summary(${summaryGrade}) vs Form137(${form137Grade}) vs Form138(${form138Grade})`,
+                                source: 'Multiple',
+                                severity: 'Medium'
+                            });
+                            validationResults.stats.gradeMismatches++;
+                        }
+                    }
+                });
+            } else {
+                validationResults.stats.missingRecords++;
+            }
+
+            // Add to results
+            if (errors.length > 0) {
+                errors.forEach(error => {
+                    validationResults.errors.push({
+                        ...error,
+                        studentName,
+                        id: summary?.lrn || form137?.lrn || form138?.lrn || 'N/A'
+                    });
+                });
+            } else if (hasAllRecords) {
+                validationResults.verified.push({
+                    id: form137?.lrn || form138?.lrn || summary?.lrn || 'N/A',
+                    name: studentName,
+                    gradeLevel: summary?.gradeLevel || form137?.gradeLevel || form138?.gradeLevel || 'N/A',
+                    generalAverage: summary?.generalAverage || 'N/A'
+                });
+            }
+
+            // Add subject comparisons
+            validationResults.subjectComparisons.push(...subjectComparisons);
+        }
+
+        function showResults() {
+            document.getElementById('progressSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            populateResults();
+        }
+
+        function populateResults() {
+            // Update stats
+            document.getElementById('gradeMismatches').textContent = validationResults.stats.gradeMismatches;
+            document.getElementById('missingRecords').textContent = validationResults.stats.missingRecords;
+            document.getElementById('completeRecords').textContent = validationResults.stats.completeRecords;
+
+            // Populate errors
+            const errorList = document.getElementById('errorList');
+            errorList.innerHTML = '';
+
+            if (validationResults.errors.length > 0) {
+                document.getElementById('totalErrors').textContent = validationResults.errors.length;
+                document.getElementById('affectedRecords').textContent = validationResults.errors.length;
+
+                validationResults.errors.forEach(error => {
+                    const severityColors = {
+                        'High': 'bg-red-100 text-red-800',
+                        'Medium': 'bg-yellow-100 text-yellow-800',
+                        'Low': 'bg-blue-100 text-blue-800'
+                    };
+
+                    const sourceColors = {
+                        'Summary': 'bg-indigo-100 text-indigo-800',
+                        'Form 137': 'bg-blue-100 text-blue-800',
+                        'Form 138': 'bg-green-100 text-green-800',
+                        'Multiple': 'bg-purple-100 text-purple-800'
+                    };
+
+                    const errorItem = document.createElement('div');
+                    errorItem.className = 'error-item bg-white p-4 rounded-lg border border-gray-200 shadow-sm mb-3';
+                    errorItem.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2 flex-wrap gap-2">
+                                    <h4 class="font-medium text-gray-800">${error.type}</h4>
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${sourceColors[error.source] || 'bg-gray-100'}">
+                                        ${error.source}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-600 font-medium">${error.studentName}</p>
+                                <p class="text-sm mt-1 text-gray-500">${error.details}</p>
+                            </div>
+                            <span class="ml-4 px-2.5 py-1 rounded-full text-xs font-medium ${severityColors[error.severity]}">
+                                ${error.severity}
+                            </span>
+                        </div>
+                    `;
+                    errorList.appendChild(errorItem);
+                });
+            } else {
+                errorList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-check-circle text-green-400 text-4xl mb-3"></i>
+                        <p>No errors found in the validation process</p>
+                    </div>
+                `;
+            }
+
+            // Populate verified records
+            const verifiedRecordsList = document.getElementById('verifiedRecordsList');
+            verifiedRecordsList.innerHTML = '';
+
+            if (validationResults.verified.length > 0) {
+                document.getElementById('totalVerified').textContent = validationResults.verified.length;
+
+                validationResults.verified.forEach(record => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${record.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.gradeLevel}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.generalAverage}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Verified
+                            </span>
+                        </td>
+                    `;
+                    verifiedRecordsList.appendChild(row);
+                });
+            } else {
+                verifiedRecordsList.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            No verified records to display
+                        </td>
+                    </tr>
+                `;
+            }
+
+            // Populate subject comparisons
+            const comparisonList = document.getElementById('subjectComparisonList');
+            comparisonList.innerHTML = '';
+
+            if (validationResults.subjectComparisons.length > 0) {
+                validationResults.subjectComparisons.forEach(comp => {
+                    const row = document.createElement('tr');
+                    const isConsistent = comp.consistent;
+                    const rowClass = isConsistent ? '' : 'bg-red-50';
+                    row.className = rowClass;
+                    row.innerHTML = `
+                        <td class="px-4 py-2 text-sm text-gray-900">${comp.studentName}</td>
+                        <td class="px-4 py-2 text-sm text-gray-500 capitalize">${comp.subject}</td>
+                        <td class="px-4 py-2 text-sm text-gray-500">${comp.summary}</td>
+                        <td class="px-4 py-2 text-sm text-gray-500">${comp.form137}</td>
+                        <td class="px-4 py-2 text-sm text-gray-500">${comp.form138}</td>
+                        <td class="px-4 py-2">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isConsistent ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${isConsistent ? 'Consistent' : 'Mismatch'}
+                            </span>
+                        </td>
+                    `;
+                    comparisonList.appendChild(row);
+                });
+            } else {
+                comparisonList.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-4 py-4 text-center text-gray-500">
+                            No comparison data available
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Tab switching
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('border-purple-500', 'text-purple-600', 'bg-purple-50');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+                
+                this.classList.add('border-purple-500', 'text-purple-600', 'bg-purple-50');
+                this.classList.remove('border-transparent', 'text-gray-500');
+                
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
